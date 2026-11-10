@@ -19,6 +19,7 @@ OWNER_ID = int(os.getenv("OWNER_ID", "123456789"))  # Main Owner User ID
 
 MODEL = "google/gemini-3.6-flash"
 TARGET_BOT_USERNAME = "folkapp_bot"
+TARGET_BOT_ID = 8764228323
 MAX_QUESTIONS = 50
 
 TOPICS = [
@@ -377,7 +378,7 @@ async def cb_global_start(callback: CallbackQuery):
             try:
                 update_account_state(bc_id, count=0, waiting=True, completed=False)
                 await bot.send_message(
-                    chat_id=f"@{TARGET_BOT_USERNAME}",
+                    chat_id=TARGET_BOT_ID,
                     text="Hi",
                     business_connection_id=bc_id
                 )
@@ -493,7 +494,7 @@ async def cb_start_single(callback: CallbackQuery):
     try:
         update_account_state(full_bc_id, count=0, waiting=True, completed=False)
         await bot.send_message(
-            chat_id=f"@{TARGET_BOT_USERNAME}",
+            chat_id=TARGET_BOT_ID,
             text="Hi",
             business_connection_id=full_bc_id
         )

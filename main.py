@@ -30,7 +30,6 @@ TOPICS = [
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
-# Temporary memory to handle text inputs for adding admin IDs
 PENDING_ADMIN_INPUT = set()
 
 # --- DATABASE SETUP ---
@@ -49,7 +48,6 @@ def init_db():
             messaging_enabled INTEGER DEFAULT 1
         )
     """)
-    # Table to store authorized admin user IDs added by the owner
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS bot_admins (
             user_id INTEGER PRIMARY KEY
@@ -219,12 +217,11 @@ def get_dashboard_keyboard(user_id: int):
         types.InlineKeyboardButton(text="⏹ Stop All Campaigns", callback_data="global_stop")
     )
     
-    # Only show Admin Management option to the main owner
     if user_id == OWNER_ID:
         builder.row(types.InlineKeyboardButton(text="👥 Manage Bot Admins", callback_data="admin_manage"))
 
     builder.row(types.InlineKeyboardButton(text="🔄 Refresh Dashboard", callback_data="dash_refresh"))
-    return builder.as_markup(user_id) if hasattr(builder, 'as_markup') else builder.as_markup()
+    return builder.as_markup()
 
 def get_account_detail_keyboard(short_id: str, messaging_enabled: bool):
     builder = InlineKeyboardBuilder()
@@ -267,7 +264,7 @@ async def handle_text_inputs(message: types.Message):
             conn.commit()
             conn.close()
 
-            await message.answer(f"✅ User ID `{new_admin_id}` has been granted full admin access! They can now use the bot normally.", parse_mode=ParseMode.MARKDOWN)
+            await message.answer(f"✅ User ID `{new_admin_id}` has been granted full admin access!", parse_mode=ParseMode.MARKDOWN)
         except ValueError:
             await message.answer("⚠️ Invalid User ID. Please enter a valid numeric Telegram User ID.")
         return

@@ -367,17 +367,17 @@ async def cb_global_start(callback: CallbackQuery):
 
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    cursor.execute("SELECT business_connection_id, user_name, count, completed FROM business_accounts WHERE is_active = 1 AND messaging_enabled = 1")
+    cursor.execute("SELECT business_connection_id, user_name, user_id, count, completed FROM business_accounts WHERE is_active = 1 AND messaging_enabled = 1")
     rows = cursor.fetchall()
     conn.close()
 
     success_count = 0
-    for bc_id, user_name, count, completed in rows:
+    for bc_id, user_name, target_user_id, count, completed in rows:
         if not completed and count == 0:
             try:
                 update_account_state(bc_id, count=0, waiting=True, completed=False)
                 await bot.send_message(
-                    chat_id=f"@{TARGET_BOT_USERNAME}",
+                    chat_id=target_user_id,
                     text="Hi",
                     business_connection_id=bc_id
                 )
@@ -481,7 +481,7 @@ async def cb_start_single(callback: CallbackQuery):
     
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    cursor.execute("SELECT business_connection_id, user_name FROM business_accounts WHERE business_connection_id LIKE ?", (f"{short_id}%",))
+    cursor.execute("SELECT business_connection_id, user_name, user_id FROM business_accounts WHERE business_connection_id LIKE ?", (f"{short_id}%",))
     row = cursor.fetchone()
     conn.close()
 
@@ -489,15 +489,15 @@ async def cb_start_single(callback: CallbackQuery):
         await callback.answer("Account not found.", show_alert=True)
         return
 
-    full_bc_id, user_name = row
+    full_bc_id, user_name, target_user_id = row
     try:
         update_account_state(full_bc_id, count=0, waiting=True, completed=False)
         await bot.send_message(
-            chat_id=f"@{TARGET_BOT_USERNAME}",
+            chat_id=target_user_id,
             text="Hi",
             business_connection_id=full_bc_id
         )
-        await callback.answer(f"🚀 Started conversation with @{TARGET_BOT_USERNAME} for {user_name}!", show_alert=True)
+        await callback.answer(f"🚀 Started conversation for {user_name}!", show_alert=True)
     except Exception as e:
         await callback.answer(f"⚠️ Error: {e}", show_alert=True)
 

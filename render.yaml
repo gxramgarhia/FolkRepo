@@ -1,0 +1,21 @@
+services:
+  - type: worker
+    name: aiogram-business-worker
+    env: python
+    region: oregon # Change to your preferred region (e.g., frankfurt, ohio, singapore)
+    plan: scale  # Persistent disks require a paid plan supporting disks (e.g., Scale tier)
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    disk:
+      name: bot-storage
+      mountPath: /var/lib/data
+      sizeGB: 1
+    envVars:
+      - key: RENDER_DISK_PATH
+        value: /var/lib/data
+      - key: BOT_TOKEN
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OWNER_ID
+        sync: false
